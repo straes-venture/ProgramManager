@@ -1,11 +1,39 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <UseWindowsForms>true</UseWindowsForms>
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <Compile Include="CleanupConfirmForm.cs" />
+    <Compile Include="CleanupPreviewForm.cs" />
+    <Compile Include="EditMetadataForm.cs" />
+    <Compile Include="FilePropertiesForm.cs" />
+    <Compile Include="NewUnitDialog.cs" />
+    <Compile Include="SettingsForm.cs" />
+    <Compile Include="MainForm.cs" />
+    <Compile Include="MainForm.State.cs" />
+    <Compile Include="MainForm.Cleanup.cs" />
+    <Compile Include="MainForm.Navigation.cs" />
+    <Compile Include="MainForm.Search.cs" />
+    <Compile Include="MainForm.Zip.cs" />
+    <Compile Include="MainForm.UI.cs" />
+    <Compile Include="Program.WinForms.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <Compile Include="Program.Cli.cs" />
+  </ItemGroup>
 
 </Project>
