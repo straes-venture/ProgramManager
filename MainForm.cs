@@ -732,7 +732,7 @@ namespace ProgramManager
             {
                 // Enumerate .ACD/.RSS (exclude bak files)
                 var programPaths = Directory.EnumerateFiles(root, "*.*", System.IO.SearchOption.AllDirectories)
-                    .Where(p => (FileHelpers.HasExtension(p, ".ACD") || FileHelpers.HasExtension(p, ".RSS")) && !FileHelpers.IsBakFile(p))
+                    .Where(p => (Helpers.HasExtension(p, ".ACD") || Helpers.HasExtension(p, ".RSS")) && !Helpers.IsBakFile(p))
                     .ToList();
 
                 var rows = new List<SearchRow>();
@@ -754,7 +754,7 @@ namespace ProgramManager
                     var merFiles = Directory.EnumerateFiles(dir, "*.MER", System.IO.SearchOption.TopDirectoryOnly).ToList();
                     int merCount = merFiles.Count;
                     var bakFiles = Directory.EnumerateFiles(dir, "*", System.IO.SearchOption.TopDirectoryOnly)
-                        .Where(FileHelpers.IsBakFile)
+                        .Where(Helpers.IsBakFile)
                         .ToList();
                     int bakCount = bakFiles.Count;
 
@@ -781,9 +781,9 @@ namespace ProgramManager
                             quickPanelModified = merPath != null ? File.GetLastWriteTime(merPath) : (DateTime?)null;
                         }
 
-                        string relDir = FileHelpers.GetRelativePathPortable(root, dir);
-                        var (location, unit) = FileHelpers.ExtractLocationUnit(relDir);
-                        string quarter = FileHelpers.ToQuarter(programModified);
+                        string relDir = Helpers.GetRelativePathPortable(root, dir);
+                        var (location, unit) = Helpers.ExtractLocationUnit(relDir);
+                        string quarter = Helpers.ToQuarter(programModified);
 
                         rows.Add(new SearchRow
                         {
@@ -818,8 +818,8 @@ namespace ProgramManager
                             quickPanelModified = merPath != null ? File.GetLastWriteTime(merPath) : (DateTime?)null;
                         }
 
-                        string relDir = FileHelpers.GetRelativePathPortable(root, dir);
-                        var (location, unit) = FileHelpers.ExtractLocationUnit(relDir);
+                        string relDir = Helpers.GetRelativePathPortable(root, dir);
+                        var (location, unit) = Helpers.ExtractLocationUnit(relDir);
 
                         rows.Add(new SearchRow
                         {
@@ -1014,7 +1014,7 @@ namespace ProgramManager
 
                 // List all .ACD/.RSS files (not just summary row)
                 var programFiles = Directory.EnumerateFiles(dir, "*.*", System.IO.SearchOption.TopDirectoryOnly)
-                    .Where(p => (FileHelpers.HasExtension(p, ".ACD") || FileHelpers.HasExtension(p, ".RSS")) && !FileHelpers.IsBakFile(p))
+                    .Where(p => (Helpers.HasExtension(p, ".ACD") || Helpers.HasExtension(p, ".RSS")) && !Helpers.IsBakFile(p))
                     .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
@@ -1274,7 +1274,7 @@ namespace ProgramManager
             {
                 bakFilesToDelete.AddRange(
                     Directory.EnumerateFiles(dir, "*", System.IO.SearchOption.TopDirectoryOnly)
-                        .Where(FileHelpers.IsBakFile)
+                        .Where(Helpers.IsBakFile)
                 );
             }
 
@@ -1284,7 +1284,7 @@ namespace ProgramManager
                 .Where(r =>
                     (r.ProgramFile.EndsWith(".ACD", StringComparison.OrdinalIgnoreCase) ||
                      r.ProgramFile.EndsWith(".RSS", StringComparison.OrdinalIgnoreCase)) &&
-                    !FileHelpers.IsBakFile(r.ProgramFile)
+                    !Helpers.IsBakFile(r.ProgramFile)
                 )
                 .GroupBy(r => r.DirectoryPath ?? "", StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() > 1)
@@ -1294,7 +1294,7 @@ namespace ProgramManager
             foreach (var group in programsByDir)
             {
                 var progFiles = group
-                    .Select(i => Path.Combine(group.Key, FileHelpers.StripCountSuffix(i.ProgramFile)))
+                    .Select(i => Path.Combine(group.Key, Helpers.StripCountSuffix(i.ProgramFile)))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .Where(File.Exists)
                     .OrderBy(p => File.GetLastWriteTime(p)) // oldest first
@@ -1338,7 +1338,7 @@ namespace ProgramManager
             {
                 try
                 {
-                    string dest = FileHelpers.FlatArchiveDestination(archiveRoot, file);
+                    string dest = Helpers.FlatArchiveDestination(archiveRoot, file);
                     File.Move(file, dest);
                     moved++;
                 }
@@ -1537,7 +1537,7 @@ namespace ProgramManager
 
                     // Collect program files (.ACD/.RSS, not bak)
                     var programFiles = Directory.EnumerateFiles(dir, "*.*", System.IO.SearchOption.TopDirectoryOnly)
-                        .Where(p => (FileHelpers.HasExtension(p, ".ACD") || FileHelpers.HasExtension(p, ".RSS")) && !FileHelpers.IsBakFile(p))
+                        .Where(p => (Helpers.HasExtension(p, ".ACD") || Helpers.HasExtension(p, ".RSS")) && !Helpers.IsBakFile(p))
                         .ToList();
                     if (programFiles.Count > 1)
                     {
@@ -1649,7 +1649,7 @@ namespace ProgramManager
                     }
                     try
                     {
-                        string dest = FileHelpers.FlatArchiveDestination(archiveRoot, file);
+                        string dest = Helpers.FlatArchiveDestination(archiveRoot, file);
                         File.Move(file, dest);
                         MessageBox.Show(dlg, $"Archived:\n{file}\n\nto\n{dest}", "Archive Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         btn.Enabled = false;
@@ -1774,7 +1774,7 @@ namespace ProgramManager
             }
 
             var programFiles = Directory.EnumerateFiles(root, "*.*", System.IO.SearchOption.AllDirectories)
-                .Where(p => (FileHelpers.HasExtension(p, ".ACD") || FileHelpers.HasExtension(p, ".RSS")) && !FileHelpers.IsBakFile(p))
+                .Where(p => (Helpers.HasExtension(p, ".ACD") || Helpers.HasExtension(p, ".RSS")) && !Helpers.IsBakFile(p))
                 .ToList();
 
             // Progress bar dialog
@@ -1979,7 +1979,7 @@ namespace ProgramManager
             }
             try
             {
-                string dest = FileHelpers.FlatArchiveDestination(archiveRoot, filePath);
+                string dest = Helpers.FlatArchiveDestination(archiveRoot, filePath);
                 File.Move(filePath, dest);
                 MessageBox.Show(this, $"Archived:\n{filePath}\n\nto\n{dest}", "Archive Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 item.ForeColor = Color.Gray;
