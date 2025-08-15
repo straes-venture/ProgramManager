@@ -67,10 +67,8 @@ namespace ProgramManager
         private AppState state = new();
         private AppSettings settings;
 
-        // Add this field to store oldest files
         private List<string> oldestFiles = new List<string>();
 
-        // Add a field for the JSON directory
         private string jsonDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GLACTPM");
 
         // ----- [END] STATE MANAGEMENT FIELDS -------------------------------------------------------
@@ -399,13 +397,11 @@ namespace ProgramManager
             var stateManager = new StateManager();
             settings = stateManager.LoadSettings();
 
-            // Remove any previous detailsPanel.Controls.Add(txtNotes) and detailsPanel.Controls.Add(btnSaveNote) lines.
-
             // Events
             btnBrowse.Click += (_, __) => BrowseFolder();
             btnBrowseArchive.Click += (_, __) => BrowseArchive();
             btnCleanup.Click += (_, __) => CleanupDuplicates();
-            btnViewOldest.Click += (_, __) => ShowOldestFilesDialog(); // Add event handler
+            btnViewOldest.Click += (_, __) => ShowOldestFilesDialog();
 
             // GRID -> TREE synchronization (event wiring)
             grid.CellClick += GridRowSelectsTreeNode;
@@ -498,7 +494,6 @@ namespace ProgramManager
                 }
             };
 
-            // Add this to the end of the MainForm constructor
             this.Shown += (s, e) =>
             {
                 var missing = new List<string>();
@@ -1516,7 +1511,6 @@ namespace ProgramManager
             MessageBox.Show(this, $"Settings loaded from:\n{openDlg.FileName}", "Load Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // Add support for displaying and archiving multiple MER files in ShowOldestFilesDialog
         private void ShowOldestFilesDialog()
         {
             var root = txtRoot.Text.Trim();
@@ -2019,7 +2013,6 @@ namespace ProgramManager
             return row;
         }
 
-        // Add this method to MainForm to fix CS0103
         private void EditSelectedFileProperties()
         {
             if (lvDetails == null || lvDetails.SelectedItems.Count == 0) return;
@@ -2058,7 +2051,6 @@ namespace ProgramManager
             }
         }
 
-        // Add this method to MainForm
         private void ShowNewUnitDialog()
         {
             // Get existing locations from state
