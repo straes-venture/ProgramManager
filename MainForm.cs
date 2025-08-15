@@ -85,7 +85,7 @@ namespace ProgramManager
         // [BEGIN] CONSTRUCTOR: BUILD UI, WIRE EVENTS, LOAD STATE, REBUILD TREE
         // ------------------------------------------------------------------------------------------
 
-        public MainForm(int minNotesWidth)
+        public MainForm()
         {
             // === Window ===
             Text = "Greeley LACT Program Manager";
@@ -249,6 +249,7 @@ namespace ProgramManager
             };
 
             // Create a vertical split for grid (left) and notes (right)
+            int minNotesWidth = this.Width / 4;
             var gridAndNotesSplit = new SplitContainer
             {
                 Dock = DockStyle.Fill,
@@ -349,7 +350,6 @@ namespace ProgramManager
             // 3. Notes section (right of grid, top to bottom)
             var notesPanel = new Panel { Dock = DockStyle.Fill, MinimumSize = new Size(150, 0) };
             gridAndNotesSplit.Panel2.Controls.Add(notesPanel);
-            minNotesWidth = this.Width / 4;
             int maxNotesWidth = this.Width / 2;
 
             gridAndNotesSplit.Panel2MinSize = 120;
