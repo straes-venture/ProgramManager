@@ -6,14 +6,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <PropertyGroup>
-    <!-- Ensure default item includes skip obj/bin entirely -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**;bin\**</DefaultItemExcludes>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <!-- Belt & suspenders: remove any compile/none items that slipped in -->
-    <Compile Remove="obj\**\*.cs;bin\**\*.cs" />
-    <None    Remove="obj\**\*;bin\**\*" />
-  </ItemGroup>
 </Project>

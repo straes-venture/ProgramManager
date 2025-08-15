@@ -7,10 +7,10 @@ namespace FileHunter
 {
     public class SettingsForm : Form
     {
-        public string? SelectedRootDirectory { get; private set; }
-        public string? SelectedArchiveDirectory { get; private set; }
-        public string? SelectedJsonDirectory { get; private set; }
-        public string? SelectedDecommissionDirectory { get; private set; }
+        public string ProgramDirectory { get; private set; } = "";
+        public string ArchiveDirectory { get; private set; } = "";
+        public string JsonDirectory { get; private set; } = "";
+        public string DecommissionDirectory { get; set; } = "";
 
         private TextBox txtRoot;
         private Button btnBrowse;
