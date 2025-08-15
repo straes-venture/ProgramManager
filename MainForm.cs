@@ -1,4 +1,4 @@
-// ==============================================================================================
+﻿// ==============================================================================================
 // MainForm.cs
 // ==============================================================================================
 // PURPOSE:
@@ -41,6 +41,7 @@ namespace ProgramManager
         private SplitContainer? rightSplit;
         private DataGridView? grid;
         private TextBox? txtNotes;
+        private StateManager stateManager;
 
         // Details panel
         private Panel? detailsPanel;
@@ -394,8 +395,8 @@ namespace ProgramManager
 
             notesPanel.PerformLayout();
 
-            var stateManager = new StateManager();
-            settings = stateManager.LoadSettings();
+            stateManager = new StateManager();
+            settings = stateManager.LoadSettings<AppSettings>() ?? new AppSettings();
 
             // Events
             btnBrowse.Click += (_, __) => BrowseFolder();
@@ -1365,38 +1366,33 @@ namespace ProgramManager
         {
             try
             {
-                var path = Path.Combine(
-                    string.IsNullOrWhiteSpace(jsonDirectory)
-                        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FileHunter")
-                        : jsonDirectory,
-                    "state.json"
-                );
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                // Load state.json via centralized StateManager
+                state = stateManager.LoadState(() => new AppState());
 
-                if (File.Exists(path))
-                {
-                    var json = File.ReadAllText(path);
-                    state = JsonSerializer.Deserialize<AppState>(json) ?? new AppState();
-                    txtRoot.Text = settings.LastSearchDirectory ?? "";
-                    txtArchive.Text = settings.ArchiveDirectory ?? "";
-                }
+                // Also reflect settings into the UI
+                if (txtRoot != null) txtRoot.Text = settings?.LastSearchDirectory ?? "";
+                if (txtArchive != null) txtArchive.Text = settings?.ArchiveDirectory ?? "";
+
+                // Keep your existing jsonDirectory convenience var in sync (for file dialogs)
+                jsonDirectory = settings?.JsonDirectory ?? jsonDirectory;
             }
-            catch { state = new AppState(); }
+            catch
+            {
+                state = new AppState();
+            }
         }
 
         private void SaveState()
         {
-            settings.LastSearchDirectory = txtRoot.Text?.Trim() ?? settings.LastSearchDirectory;
-           settings.ArchiveDirectory = txtArchive.Text?.Trim() ?? settings.ArchiveDirectory;
-            var path = Path.Combine(
-                string.IsNullOrWhiteSpace(jsonDirectory)
-                    ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FileHunter")
-                    : jsonDirectory,
-                "state.json"
-            );
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            var opts = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
-            File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(state, opts));
+            // Keep settings in sync with what’s in the UI
+            if (txtRoot != null)
+                settings.LastSearchDirectory = txtRoot.Text?.Trim() ?? settings.LastSearchDirectory;
+            if (txtArchive != null)
+                settings.ArchiveDirectory = txtArchive.Text?.Trim() ?? settings.ArchiveDirectory;
+
+            // Persist both files via centralized paths
+            stateManager.SaveState(state);
+            stateManager.SaveSettings(settings);
         }
 
         private void SaveJsonFile()

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
@@ -7,10 +7,10 @@ namespace FileHunter
 {
     public class SettingsForm : Form
     {
-        public string ProgramDirectory = string.Empty;
-        public string ArchiveDirectory = string.Empty;
-        public string JsonDirectory = string.Empty;
-        public string DecommissionDirectory = string.Empty;
+        public string? SelectedRootDirectory { get; private set; }
+        public string? SelectedArchiveDirectory { get; private set; }
+        public string? SelectedJsonDirectory { get; private set; }
+        public string? SelectedDecommissionDirectory { get; private set; }
 
         private TextBox txtRoot;
         private Button btnBrowse;
@@ -121,31 +121,11 @@ namespace FileHunter
                 ArchiveDirectory = txtArchive.Text.Trim();
                 JsonDirectory = txtJson.Text.Trim();
                 DecommissionDirectory = txtDecommission.Text.Trim();
+
                 DialogResult = DialogResult.OK;
-
-                var appSettings = new AppSettings
-                {
-                    ProgramDirectory = ProgramDirectory,
-                    ArchiveDirectory = ArchiveDirectory,
-                    JsonDirectory = JsonDirectory,
-                    DecommissionDirectory = DecommissionDirectory
-                };
-
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                var jsonSettings = JsonSerializer.Serialize(appSettings, options);
-
-                try
-                {
-                    Directory.CreateDirectory(JsonDirectory);
-                    File.WriteAllText(Path.Combine(JsonDirectory, "settings.json"), jsonSettings);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, $"Failed to save settings:\n{ex.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
                 Close();
             };
+
         }
     }
 }

@@ -1,76 +1,107 @@
-using FileHunter;
-using System;
+﻿using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-public class StateManager
+namespace ProgramManager;
+
+/// <summary>
+/// Centralized persistence for state and settings.
+/// - Stores files under a unified base directory (default: %APPDATA%\GLACTPM).
+/// - You can override the base directory and/or explicit file paths.
+/// - Provides generic helpers so you can use your own AppState/AppSettings types.
+/// </summary>
+public sealed class StateManager
 {
+    private readonly string _baseDir;
     private readonly string _stateFilePath;
     private readonly string _settingsFilePath;
 
-    public StateManager(string? stateFilePath = null, string? settingsFilePath = null)
+    // Consistent JSON options across reads/writes.
+    private static readonly JsonSerializerOptions JsonOpts = new()
     {
-        _stateFilePath = stateFilePath ?? "state.json";
-        _settingsFilePath = settingsFilePath ?? "settings.json";
+        WriteIndented = true,
+        AllowTrailingCommas = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
+    /// <summary>
+    /// Preferred constructor.
+    /// - baseDir: directory where both state.json and settings.json will live.
+    /// - stateFilePath/settingsFilePath: explicit overrides (optional).
+    /// </summary>
+    public StateManager(string? baseDir = null, string? stateFilePath = null, string? settingsFilePath = null)
+    {
+        _baseDir = baseDir ?? GetDefaultBaseDir();
+        Directory.CreateDirectory(_baseDir);
+
+        _stateFilePath = string.IsNullOrWhiteSpace(stateFilePath)
+            ? Path.Combine(_baseDir, "state.json")
+            : stateFilePath!;
+
+        _settingsFilePath = string.IsNullOrWhiteSpace(settingsFilePath)
+            ? Path.Combine(_baseDir, "settings.json")
+            : settingsFilePath!;
     }
 
-    public AppState LoadState()
-    {
-        try
-        {
-            if (!File.Exists(_stateFilePath))
-                return new AppState();
+    /// <summary>
+    /// Legacy-compat: allow passing only a state-file path.
+    /// </summary>
+    public StateManager(string stateFilePath)
+        : this(baseDir: null, stateFilePath: stateFilePath, settingsFilePath: null) { }
 
-            string jsonState = File.ReadAllText(_stateFilePath);
-            var state = JsonSerializer.Deserialize<AppState>(jsonState);
-            return state ?? new AppState();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to load state from '{_stateFilePath}'.", ex);
-        }
+    private static string GetDefaultBaseDir()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return Path.Combine(appData, "GLACTPM");
     }
 
-    public AppSettings LoadSettings()
-    {
-        try
-        {
-            if (!File.Exists(_settingsFilePath))
-                return new AppSettings();
+    // ----------------------------
+    //  State load/save (generic)
+    // ----------------------------
 
-            string jsonSettings = File.ReadAllText(_settingsFilePath);
-            var settings = JsonSerializer.Deserialize<AppSettings>(jsonSettings);
-            return settings ?? new AppSettings();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to load settings from '{_settingsFilePath}'.", ex);
-        }
+    public TState LoadState<TState>(Func<TState> makeDefault)
+    {
+        if (!File.Exists(_stateFilePath)) return makeDefault();
+        var json = File.ReadAllText(_stateFilePath);
+        var result = JsonSerializer.Deserialize<TState>(json, JsonOpts);
+        return result is not null ? result : makeDefault();
     }
 
-    public void SaveState(AppState state)
+    public void SaveState<TState>(TState state)
     {
-        try
-        {
-            string jsonState = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(_stateFilePath, jsonState);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to save state to '{_stateFilePath}'.", ex);
-        }
+        var json = JsonSerializer.Serialize(state, JsonOpts);
+        File.WriteAllText(_stateFilePath, json);
     }
 
-    public void SaveSettings(AppSettings settings)
+    // -------------------------------
+    //  Settings load/save (generic)
+    // -------------------------------
+
+    public void SaveSettings<TSettings>(TSettings settings)
     {
-        try
-        {
-            string jsonSettings = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(_settingsFilePath, jsonSettings);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to save settings to '{_settingsFilePath}'.", ex);
-        }
+        var json = JsonSerializer.Serialize(settings, JsonOpts);
+        File.WriteAllText(_settingsFilePath, json);
     }
+
+    public TSettings? LoadSettings<TSettings>()
+    {
+        if (!File.Exists(_settingsFilePath)) return default;
+        var json = File.ReadAllText(_settingsFilePath);
+        return JsonSerializer.Deserialize<TSettings>(json, JsonOpts);
+    }
+
+    public TSettings LoadSettingsOr<TSettings>(TSettings fallback)
+    {
+        var loaded = LoadSettings<TSettings>();
+        return loaded is null ? fallback : loaded;
+    }
+
+    // -------------------------------
+    //  Paths (useful for diagnostics)
+    // -------------------------------
+    public string BaseDirectory => _baseDir;
+    public string StatePath => _stateFilePath;
+    public string SettingsPath => _settingsFilePath;
 }
