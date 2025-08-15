@@ -11,7 +11,7 @@ using System.IO;
 
 namespace FileHunter
 {
-    internal static class FileHelpers
+    internal static class Helpers
     {
         // ------------------------------------------------------------------------------------------
         // [BEGIN] GENERAL FILE HELPERS
