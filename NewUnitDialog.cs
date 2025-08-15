@@ -80,7 +80,7 @@ namespace FileHunter
 
             btnCreate.Click += (s, e) =>
             {
-                SelectedLocation = cmbLocation.SelectedItem?.ToString() == "<Add New Location>"
+                SelectedLocation = cmbLocation.SelectedItem?.ToString() == "<New Location>"
                     ? txtNewLocation.Text.Trim()
                     : cmbLocation.SelectedItem?.ToString() ?? "";
                 UnitNames = unitsPanel.Controls.OfType<TextBox>().Select(t => t.Text.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToList();
