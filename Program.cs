@@ -15,8 +15,6 @@ namespace ProgramManager
     // ----------------------------------------------------------------------------------------------
     internal static class Program
     {
-        public static int minNotesWidth { get; private set; }
-
         [STAThread]
         static void Main()
         {
@@ -25,7 +23,7 @@ namespace ProgramManager
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 #endif
-            Application.Run(new MainForm(minNotesWidth));
+            Application.Run(new MainForm());
             // [END] WinForms bootstrap
         }
     }
